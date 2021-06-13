@@ -127,7 +127,7 @@ class FormatterApplicationTests {
 				"			AND IFNULL(product_batch, 0) = 0" +
 				"			AND bea1.remark LIKE CONCAT('%', T.id, '%')";
 
-  		private String shortSql = "SELECT A, IFNULL((SELECT X FROM YY),0) C FROM (SELECT A, B FROM QQ WHERE A=3) AS ABC WHERE 1=(SELECT COUNT(*) FROM WW)";
+  		private String shortSql = "SELECT A, C2, IFNULL((SELECT X FROM YY),0) C FROM (SELECT A, B FROM QQ WHERE A=3) AS ABC WHERE 1=(SELECT COUNT(*) FROM WW)";
 
   	@Test
 	public void testTokens() {

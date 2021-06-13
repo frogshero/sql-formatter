@@ -1,5 +1,5 @@
 // Generated from D:/wgf/antlr4/sql-formatter/src/main/resources/grammar\MySqlLexer.g4 by ANTLR 4.9.1
-package com.hubery.formatter.grammar;
+package grammar;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;
