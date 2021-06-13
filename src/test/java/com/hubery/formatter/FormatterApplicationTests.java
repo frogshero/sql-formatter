@@ -3,7 +3,6 @@ package com.hubery.formatter;
 import com.hubery.formatter.common.CaseChangingCharStream;
 import com.hubery.formatter.grammar.MySqlLexer;
 import com.hubery.formatter.grammar.MySqlParser;
-import com.hubery.formatter.walker.My2MySqlParserListener;
 import com.hubery.formatter.walker.MyMySqlParserListener;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -152,7 +151,7 @@ class FormatterApplicationTests {
 		ParseTree tree = parser.selectStatement();
 
 		ParseTreeWalker ptw = new ParseTreeWalker();
-		ptw.walk(new My2MySqlParserListener(), tree);
+		ptw.walk(new MyMySqlParserListener(), tree);
 	}
 
 
