@@ -3,13 +3,17 @@ package com.hubery.formatter;
 import com.hubery.formatter.common.CaseChangingCharStream;
 import com.hubery.formatter.grammar.MySqlLexer;
 import com.hubery.formatter.grammar.MySqlParser;
+import com.hubery.formatter.walker.My2MySqlParserListener;
 import com.hubery.formatter.walker.MyMySqlParserListener;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 class FormatterApplicationTests {
   String sql = "SELECT SUM(a), SUM(b), SUM(c), SUM(d), SUM(e), SUM(f), SUM(num) FROM (" +
@@ -93,7 +97,6 @@ class FormatterApplicationTests {
 		"		WHERE wmo.relevance_batch_no = T.batch_no" +
 		"			AND wmo.state = 2" +
 		"	), 0) AS num" +
-		"	" +
 		"	FROM (" +
 		"		SELECT" +
 		"			wpb.id AS batchId," +
@@ -115,9 +118,33 @@ class FormatterApplicationTests {
 		"		) T" +
 		"		) T1";
 
+  		private String simple = "SELECT SUM(osid.num) x, id as id" +
+				"		FROM oa_stock_in_detail osid" +
+				"			LEFT JOIN base_equipment_accounts bea1 ON bea1.id = osid.furnace_id" +
+				"		WHERE SUBSTR(T.batch_no, 1, 4) = DATE_FORMAT(osid.created_time, '%y%m')" +
+				"			AND materiel_id = 5712" +
+				"			AND osid.enableflg = 1" +
+				"			AND IFNULL(product_batch, 0) = 0" +
+				"			AND bea1.remark LIKE CONCAT('%', T.id, '%')";
+
+  		private String shortSql = "SELECT A, IFNULL((SELECT X FROM YY),0) C FROM (SELECT A, B FROM QQ WHERE A=3) AS ABC WHERE 1=(SELECT COUNT(*) FROM WW)";
+
+  	@Test
+	public void testTokens() {
+		CharStream input = CharStreams.fromString(simple);
+		CaseChangingCharStream cc = new CaseChangingCharStream(input, true);
+		MySqlLexer lexer = new MySqlLexer(cc);
+		CommonTokenStream tokens = new CommonTokenStream(lexer);
+		tokens.fill();
+		List<Token> tks = tokens.getTokens();
+		for (Token tk : tks) {
+			System.out.println(tk.getText());
+		}
+	}
+
 	@Test
-	void test() {
-		CharStream input = CharStreams.fromString(sql);
+	public void test() {
+		CharStream input = CharStreams.fromString(shortSql);
 		CaseChangingCharStream cc = new CaseChangingCharStream(input, true);
 		MySqlLexer lexer = new MySqlLexer(cc);
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -125,7 +152,9 @@ class FormatterApplicationTests {
 		ParseTree tree = parser.selectStatement();
 
 		ParseTreeWalker ptw = new ParseTreeWalker();
-		ptw.walk(new MyMySqlParserListener(), tree);
+		ptw.walk(new My2MySqlParserListener(), tree);
 	}
+
+
 
 }
