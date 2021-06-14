@@ -21,7 +21,9 @@ public class MySqlParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
 	@Override public T visitNaturalJoin(MySqlParser.NaturalJoinContext ctx) { return visitChildren(ctx); }
 	@Override public T visitQueryExpression(MySqlParser.QueryExpressionContext ctx) { return visitChildren(ctx); }
 	@Override public T visitQueryExpressionNointo(MySqlParser.QueryExpressionNointoContext ctx) { return visitChildren(ctx); }
-	@Override public T visitQuerySpecification(MySqlParser.QuerySpecificationContext ctx) { return visitChildren(ctx); }
+	@Override public T visitQuerySpecification(MySqlParser.QuerySpecificationContext ctx) {
+		return visitChildren(ctx);
+	}
 	@Override public T visitQuerySpecificationNointo(MySqlParser.QuerySpecificationNointoContext ctx) { return visitChildren(ctx); }
 	@Override public T visitUnionParenthesis(MySqlParser.UnionParenthesisContext ctx) { return visitChildren(ctx); }
 	@Override public T visitUnionStatement(MySqlParser.UnionStatementContext ctx) { return visitChildren(ctx); }

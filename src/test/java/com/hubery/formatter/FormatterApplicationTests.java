@@ -3,7 +3,8 @@ package com.hubery.formatter;
 import com.hubery.formatter.common.CaseChangingCharStream;
 import com.hubery.formatter.grammar.MySqlLexer;
 import com.hubery.formatter.grammar.MySqlParser;
-import com.hubery.formatter.walker.MyMySqlParserListener;
+import com.hubery.formatter.my.MyMySqlParserListener;
+import com.hubery.formatter.my.MyMySqlParserVisitor;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -12,6 +13,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.List;
 
 class FormatterApplicationTests {
@@ -128,6 +130,24 @@ class FormatterApplicationTests {
 
   		private String shortSql = "SELECT A, C2, IFNULL((SELECT X FROM YY),0) C FROM (SELECT A, B FROM QQ WHERE A=3) AS ABC WHERE 1=(SELECT COUNT(*) FROM WW)";
 
+	@Test
+	public void testVisitor() {
+		ParseTree tree = getParseTree(sql);
+		MyMySqlParserVisitor visitor = new MyMySqlParserVisitor();
+		String ret = visitor.visit(tree);
+		System.out.println(ret);
+	}
+
+	private ParseTree getParseTree(String testSql) {
+		CharStream input = CharStreams.fromString(testSql);
+		CaseChangingCharStream cc = new CaseChangingCharStream(input, true);
+		MySqlLexer lexer = new MySqlLexer(cc);
+		CommonTokenStream tokens = new CommonTokenStream(lexer);
+		MySqlParser parser = new MySqlParser(tokens);
+		ParseTree tree = parser.selectStatement();
+		return tree;
+	}
+
   	@Test
 	public void testTokens() {
 		CharStream input = CharStreams.fromString(simple);
@@ -143,17 +163,19 @@ class FormatterApplicationTests {
 
 	@Test
 	public void test() {
-		CharStream input = CharStreams.fromString(shortSql);
-		CaseChangingCharStream cc = new CaseChangingCharStream(input, true);
-		MySqlLexer lexer = new MySqlLexer(cc);
-		CommonTokenStream tokens = new CommonTokenStream(lexer);
-		MySqlParser parser = new MySqlParser(tokens);
-		ParseTree tree = parser.selectStatement();
-
+		ParseTree tree = getParseTree(shortSql);
 		ParseTreeWalker ptw = new ParseTreeWalker();
 		ptw.walk(new MyMySqlParserListener(), tree);
 	}
 
-
+	char[] NO_SPACE_BEFORE = {',', '(', ')'};
+	@Test
+	public void testSearch() {
+		if (NO_SPACE_BEFORE[0] == ',') {
+			System.out.println("XX");
+		}
+		int ret = Arrays.binarySearch(NO_SPACE_BEFORE, ',');
+		System.out.println(ret);
+	}
 
 }

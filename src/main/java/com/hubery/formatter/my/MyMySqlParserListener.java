@@ -1,4 +1,4 @@
-package com.hubery.formatter.walker;
+package com.hubery.formatter.my;
 
 import com.hubery.formatter.grammar.MySqlParser;
 import com.hubery.formatter.grammar.MySqlParserBaseListener;
