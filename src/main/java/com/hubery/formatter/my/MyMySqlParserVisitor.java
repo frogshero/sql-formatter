@@ -2,7 +2,6 @@ package com.hubery.formatter.my;
 
 import com.hubery.formatter.grammar.MySqlParser;
 import com.hubery.formatter.grammar.MySqlParserBaseVisitor;
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.lang3.StringUtils;
@@ -13,10 +12,11 @@ import java.util.List;
 import static com.hubery.formatter.grammar.MySqlParser.*;
 
 public class MyMySqlParserVisitor extends MySqlParserBaseVisitor<String> {
-    private int[] NEXT_LINE_KEY = {SELECT, FROM, WHERE, INNER, LEFT};
+    private int[] NEXT_LINE_KEY = {SELECT, FROM, WHERE, INNER, LEFT, AND, GROUP, LIMIT, ORDER};
     private char[] NO_SPACE_AFTER = {'.', '(', '!'};
     private char[] NO_SPACE_BEFORE = {' ', ',', '.', '(', ')'};
     private char NEXT_LINE = '\n';
+    private int MAX_LINE_LEN = 80;
     private int level = 0;
 
     private String nvl(String s) {
@@ -97,13 +97,22 @@ public class MyMySqlParserVisitor extends MySqlParserBaseVisitor<String> {
 
     @Override
     public String visitSelectElements(MySqlParser.SelectElementsContext ctx) {
-        //
+        //字段列表换行
+        String nextLineAppend = "\n" + StringUtils.repeat(" ", (level+1)*4);
         StringBuilder sb = new StringBuilder();
+//        StringBuilder sbLine = new StringBuilder();
         for (SelectElementContext child : ctx.selectElement()) {
-            sb.append(visit(child));
-            sb.append(isLastOne(ctx.selectElement(), child) ? "" : ",");
-            sb.append(hasSubQuery(child) ? "\n" + StringUtils.repeat(" ", (level+1)*4) : "");
-
+            String childStr = visit(child);
+            sb.append(childStr);
+            if (!isLastOne(ctx.selectElement(), child)) {
+                sb.append(", ");
+                if (hasSubQuery(child)) {
+                    sb.append("\n" + nextLineAppend);
+                } else if (childStr.length() > 50) {
+                    sb.append(nextLineAppend);
+                }
+            }
+            //sb.append(hasSubQuery(child) && !isLastOne(ctx.selectElement(), child) ? "\n" + nextLineAppend : "");
         }
         return sb.toString();
     }

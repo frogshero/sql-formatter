@@ -13,6 +13,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -131,11 +132,22 @@ class FormatterApplicationTests {
   		private String shortSql = "SELECT A, C2, IFNULL((SELECT X FROM YY),0) C FROM (SELECT A, B FROM QQ WHERE A=3) AS ABC WHERE 1=(SELECT COUNT(*) FROM WW)";
 
 	@Test
-	public void testVisitor() {
-		ParseTree tree = getParseTree(sql);
+	public void testVisitor() throws IOException {
+//		ParseTree tree = getParseTree(sql);
+		ParseTree tree = getParseTreeFromFile("D:\\wgf\\antlr4\\longQuery.txt");
 		MyMySqlParserVisitor visitor = new MyMySqlParserVisitor();
 		String ret = visitor.visit(tree);
 		System.out.println(ret);
+	}
+
+	private ParseTree getParseTreeFromFile(String fname) throws IOException {
+		CharStream input = CharStreams.fromFileName(fname);
+		CaseChangingCharStream cc = new CaseChangingCharStream(input, true);
+		MySqlLexer lexer = new MySqlLexer(cc);
+		CommonTokenStream tokens = new CommonTokenStream(lexer);
+		MySqlParser parser = new MySqlParser(tokens);
+		ParseTree tree = parser.selectStatement();
+		return tree;
 	}
 
 	private ParseTree getParseTree(String testSql) {
