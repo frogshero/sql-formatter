@@ -1,4 +1,4 @@
-// Generated from D:/wgf/antlr4/sql-formatter/src/main/resources/grammar\MySqlParser.g4 by ANTLR 4.9.1
+// Generated from E:/wgf/source/test/formatter/src/main/resources/grammar\MySqlParser.g4 by ANTLR 4.9.1
 package com.hubery.formatter.grammar;
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;

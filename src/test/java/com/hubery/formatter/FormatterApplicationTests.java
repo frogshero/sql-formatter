@@ -134,7 +134,7 @@ class FormatterApplicationTests {
 	@Test
 	public void testVisitor() throws IOException {
 //		ParseTree tree = getParseTree(sql);
-		ParseTree tree = getParseTreeFromFile("D:\\wgf\\antlr4\\longQuery.txt");
+		ParseTree tree = getParseTreeFromFile("E:\\wgf\\antlr4\\longQuery2.txt");
 		MyMySqlParserVisitor visitor = new MyMySqlParserVisitor();
 		String ret = visitor.visit(tree);
 		System.out.println(ret);
