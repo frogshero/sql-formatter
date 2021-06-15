@@ -16,7 +16,8 @@ public class MyMySqlParserVisitor extends MySqlParserBaseVisitor<String> {
     private char[] NO_SPACE_AFTER = {'.', '(', '!'};
     private char[] NO_SPACE_BEFORE = {' ', ',', '.', '(', ')'};
     private char NEXT_LINE = '\n';
-    private int MAX_LINE_LEN = 80;
+    private int MAX_LINE_LEN = 120;
+    private int MAX_AS_LEN = 80;
     private int level = 0;
 
     private String nvl(String s) {
@@ -95,26 +96,18 @@ public class MyMySqlParserVisitor extends MySqlParserBaseVisitor<String> {
                 + StringUtils.repeat(" ", level*4) : "") + node.getText();
     }
 
+
     @Override
     public String visitSelectElements(MySqlParser.SelectElementsContext ctx) {
         //字段列表换行
         String nextLineAppend = "\n" + StringUtils.repeat(" ", (level+1)*4);
-        StringBuilder sb = new StringBuilder();
-//        StringBuilder sbLine = new StringBuilder();
+        SelectElementsWrapperBuilder wrapperBuilder = new SelectElementsWrapperBuilder(MAX_AS_LEN, MAX_LINE_LEN, nextLineAppend);
+
         for (SelectElementContext child : ctx.selectElement()) {
             String childStr = visit(child);
-            sb.append(childStr);
-            if (!isLastOne(ctx.selectElement(), child)) {
-                sb.append(", ");
-                if (hasSubQuery(child)) {
-                    sb.append("\n" + nextLineAppend);
-                } else if (childStr.length() > 50) {
-                    sb.append(nextLineAppend);
-                }
-            }
-            //sb.append(hasSubQuery(child) && !isLastOne(ctx.selectElement(), child) ? "\n" + nextLineAppend : "");
+            wrapperBuilder.addText(childStr);
         }
-        return sb.toString();
+        return wrapperBuilder.getText();
     }
 //    @Override public String visitSelectFunctionElement(SelectFunctionElementContext ctx) {
 //        return visitChildren(ctx) + (hasSubQuery(ctx) ? NEXT_LINE : "");
