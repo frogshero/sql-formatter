@@ -2,6 +2,7 @@ package com.hubery.formatter.my;
 
 import com.hubery.formatter.grammar.MySqlParser;
 import com.hubery.formatter.grammar.MySqlParserBaseVisitor;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.lang3.StringUtils;
@@ -12,7 +13,7 @@ import java.util.List;
 import static com.hubery.formatter.grammar.MySqlParser.*;
 
 public class MyMySqlParserVisitor extends MySqlParserBaseVisitor<String> {
-    private int[] NEXT_LINE_KEY = {SELECT, FROM, WHERE, INNER, LEFT, AND, GROUP, LIMIT, ORDER};
+    private int[] NEXT_LINE_KEY = {SELECT, FROM, WHERE, INNER, LEFT, AND, GROUP, LIMIT, ORDER, UNION};
     private char[] NO_SPACE_AFTER = {'.', '(', '!'};
     private char[] NO_SPACE_BEFORE = {' ', ',', '.', '(', ')'};
     private char NEXT_LINE = '\n';
@@ -83,6 +84,9 @@ public class MyMySqlParserVisitor extends MySqlParserBaseVisitor<String> {
         return o == list.get(list.size() - 1);
     }
 
+    private String nextLinePrefix(int indent) {
+        return NEXT_LINE + StringUtils.repeat(" ", (level + indent) * 4);
+    }
     /**
      * 是否换行？取决于特定关键字
      * @param node
@@ -92,16 +96,14 @@ public class MyMySqlParserVisitor extends MySqlParserBaseVisitor<String> {
     public String visitTerminal(TerminalNode node) {
         boolean nextLine = Arrays.stream(NEXT_LINE_KEY).anyMatch(e -> e == node.getSymbol().getType());
         //+ (node.getSymbol().getType() == SELECT ? "\n" : "")
-        return (nextLine ? NEXT_LINE
-                + StringUtils.repeat(" ", level*4) : "") + node.getText();
+        return (nextLine ? nextLinePrefix(0) : "") + node.getText();
     }
 
 
     @Override
     public String visitSelectElements(MySqlParser.SelectElementsContext ctx) {
         //字段列表换行
-        String nextLineAppend = "\n" + StringUtils.repeat(" ", (level+1)*4);
-        SelectElementsWrapperBuilder wrapperBuilder = new SelectElementsWrapperBuilder(MAX_AS_LEN, MAX_LINE_LEN, nextLineAppend);
+        SelectElementsWrapperBuilder wrapperBuilder = new SelectElementsWrapperBuilder(MAX_AS_LEN, MAX_LINE_LEN, nextLinePrefix(1));
 
         for (SelectElementContext child : ctx.selectElement()) {
             String childStr = visit(child);
@@ -121,6 +123,12 @@ public class MyMySqlParserVisitor extends MySqlParserBaseVisitor<String> {
 //        return "(" + visit(ctx.selectStatement()) + ")\n";
 //    }
 
+    private String enterSelect(ParserRuleContext ctx) {
+        level++;
+        String ret = visitChildren(ctx);
+        level--;
+        return ret;
+    }
     /**
      * select SQL的嵌套层次
      * @param ctx
@@ -128,10 +136,25 @@ public class MyMySqlParserVisitor extends MySqlParserBaseVisitor<String> {
      */
     @Override
     public String visitQuerySpecification(QuerySpecificationContext ctx) {
-        level++;
-        String ret = visitChildren(ctx);
-        level--;
-        return ret;
+        return enterSelect(ctx);
     }
 
+    @Override
+    public String visitQuerySpecificationNointo(QuerySpecificationNointoContext ctx) {
+        return enterSelect(ctx);
+    }
+
+//    @Override public String visitCaseFunctionCall(MySqlParser.CaseFunctionCallContext ctx) {
+//        return visitChildren(ctx);
+//    }
+    //When子句
+    @Override
+    public String visitCaseFuncAlternative(MySqlParser.CaseFuncAlternativeContext ctx) {
+        String childStr = visitChildren(ctx);
+        if (!StringUtils.isBlank(childStr) && ctx != ctx.parent.getChild(1)) {
+            return  nextLinePrefix(2) + childStr;
+        } else {
+            return childStr;
+        }
+    }
 }
