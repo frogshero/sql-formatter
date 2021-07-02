@@ -19,7 +19,9 @@ public class SelectElementsWrapperBuilder {
             sb.append(line);
         }
         //删除最后一个,
-        sb.delete(sb.length() - COMMA_DELIMITER.length(), sb.length());
+        if (line.length() > 0) {
+            sb.delete(sb.length() - COMMA_DELIMITER.length(), sb.length());
+        }
         return sb.toString();
     }
 

@@ -14,7 +14,7 @@ import static com.hubery.formatter.grammar.MySqlParser.*;
 
 public class MyMySqlParserVisitor extends MySqlParserBaseVisitor<String> {
     private int[] NEXT_LINE_KEY = {SELECT, FROM, WHERE, INNER, LEFT, AND, GROUP, LIMIT, ORDER, UNION};
-    private char[] NO_SPACE_AFTER = {'.', '(', '!'};
+    private char[] NO_SPACE_AFTER = {'.', '(', '!', '>', '<'};
     private char[] NO_SPACE_BEFORE = {' ', ',', '.', '(', ')'};
     private char NEXT_LINE = '\n';
     private int MAX_LINE_LEN = 120;
@@ -94,6 +94,9 @@ public class MyMySqlParserVisitor extends MySqlParserBaseVisitor<String> {
      */
     @Override
     public String visitTerminal(TerminalNode node) {
+//        if (node.getSymbol().getType() == STAR) {
+//            System.out.print("xxx");
+//        }
         boolean nextLine = Arrays.stream(NEXT_LINE_KEY).anyMatch(e -> e == node.getSymbol().getType());
         //+ (node.getSymbol().getType() == SELECT ? "\n" : "")
         return (nextLine ? nextLinePrefix(0) : "") + node.getText();
@@ -105,12 +108,18 @@ public class MyMySqlParserVisitor extends MySqlParserBaseVisitor<String> {
         //字段列表换行
         SelectElementsWrapperBuilder wrapperBuilder = new SelectElementsWrapperBuilder(MAX_AS_LEN, MAX_LINE_LEN, nextLinePrefix(1));
 
-        for (SelectElementContext child : ctx.selectElement()) {
-            String childStr = visit(child);
-            wrapperBuilder.addText(childStr);
+        //star='*' | selectElement
+        if (ctx.selectElement().size() == 0) {
+            wrapperBuilder.addText(ctx.star.getText());
+        } else {
+            for (SelectElementContext child : ctx.selectElement()) {
+                String childStr = visit(child);
+                wrapperBuilder.addText(childStr);
+            }
         }
         return wrapperBuilder.getText();
     }
+
 //    @Override public String visitSelectFunctionElement(SelectFunctionElementContext ctx) {
 //        return visitChildren(ctx) + (hasSubQuery(ctx) ? NEXT_LINE : "");
 //    }
@@ -127,7 +136,7 @@ public class MyMySqlParserVisitor extends MySqlParserBaseVisitor<String> {
         level++;
         String ret = visitChildren(ctx);
         level--;
-        return ret;
+        return ret + nextLinePrefix(1);
     }
     /**
      * select SQL的嵌套层次
