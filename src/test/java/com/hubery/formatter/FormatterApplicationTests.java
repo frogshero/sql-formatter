@@ -41,8 +41,8 @@ class FormatterApplicationTests {
 
 	@Test
 	public void testVisitor() throws IOException {
-		ParseTree tree = getParseTree(shortSql);
-//		ParseTree tree = getParseTreeFromFile("E:\\wgf\\antlr4\\sqls\\xx.sql");
+//		ParseTree tree = getParseTree(shortSql);
+		ParseTree tree = getParseTreeFromFile("E:\\wgf\\antlr4\\sqls\\xx.sql");
 //		ParseTree tree = getParseTreeFromFile("E:\\wgf\\antlr4\\sqls\\monthReport.txt");
 //		ParseTree tree = getParseTreeFromFile("E:\\wgf\\antlr4\\sqls\\boardMonth.txt");
 		MyMySqlParserVisitor visitor = new MyMySqlParserVisitor();
