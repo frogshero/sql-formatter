@@ -37,8 +37,13 @@ class FormatterApplicationTests {
 				"select * from collect_flow_coburg " +
 				"WHERE create_date > '2021-06-13' ";
 
-  		private String shortSql = "SELECT * FROM abc";
+  		private String shortSql = "SELECT e.`a` from abc as e";
 
+	/**
+	 * 缺陷：不能用 ` 字符把字段括起来。如：e.`a`识别不了,为此修改了MySqlLexer.g4增加了 '.`' ID_LITERAL '`'
+	 * 1：打开MySqlParser.g4文件，在Structure里找到rule右键Test Rule 2: ANTLR Preview里输入SQL(大写)
+	 * @throws IOException
+	 */
 	@Test
 	public void testVisitor() throws IOException {
 //		ParseTree tree = getParseTree(shortSql);
@@ -62,6 +67,7 @@ class FormatterApplicationTests {
 
 	private ParseTree getParseTree(String testSql) {
 		CharStream input = CharStreams.fromString(testSql);
+		//大写
 		CaseChangingCharStream cc = new CaseChangingCharStream(input, true);
 		MySqlLexer lexer = new MySqlLexer(cc);
 		CommonTokenStream tokens = new CommonTokenStream(lexer);

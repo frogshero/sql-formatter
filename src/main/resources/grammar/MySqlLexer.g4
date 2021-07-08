@@ -1226,7 +1226,10 @@ STRING_CHARSET_NAME:                 '_' CHARSET_NAME;
 // Prevent recognize string:         .123somelatin AS ((.123), FLOAT_LITERAL), ((somelatin), ID)
 //  it must recoginze:               .123somelatin AS ((.), DOT), (123somelatin, ID)
 
-DOT_ID:                              '.' ID_LITERAL;
+DOT_ID:                              '.' ID_LITERAL
+                                     | '.`' ID_LITERAL '`'
+;
+
 
 
 
